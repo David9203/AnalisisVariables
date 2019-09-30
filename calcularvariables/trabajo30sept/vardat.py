@@ -1,4 +1,6 @@
+
 import librosa
+import pandas as pd
 import numpy as np
 import csv
 from IPython.display import clear_output
@@ -9,29 +11,36 @@ import soundfile as sf
 from Indices import *
 import glob
 import time
+
+#·························DB path·····················
 #% cd /media/david/DavidDD/2017
-os.chdir("/media/david/DavidDD/2017")  ##direccion de disco duro
+os.chdir("/media/david/DavidDD/bioacustica/2017")  ##direccion de disco duro
 
-header = ["filename","chroma_stft","spec_cent","spec_bw", "ADI", "ACI", "TE", "ESM", "NDSI", "P", "M", "mba","bnf" ,"md","fm", "we", "rms", "cf",
-                        "ADIm1", "ADIm2", "ADIm3", "ADIm4", "ADIm5", "ADIm6", "ADIm7", "ADIm8",
-                       "ADIm9", "ADIm10", "ADIm11"]
 
+#···········Arguments for function-·····························
 tipo_ventana = "hann"
 sobreposicion = 0
 tamano_ventana = 512
 nfft= 512
 bio_band = (2000, 8000)
 tech_band = (200, 1500)
-grabadora=glob.glob(f''+'*')
+grabadora=glob.glob('*/')
 
 '''Gneres es la grabadora, fecha es la fecha dentro de la grabadora y filename es el nombre de la grabacion'''
 
-for g in grabadora[1:]:
+#············Declare Datarray··································
+header = ["filename","chroma_stft","spec_cent","spec_bw", "ADI", "TE", "ESM", "NDSI", "P", "M", "mba","bnf" ,"md","fm", "we", "rms", "cf",
+                        "ADIm1", "ADIm2", "ADIm3", "ADIm4", "ADIm5", "ADIm6", "ADIm7", "ADIm8",
+                       "ADIm9", "ADIm10", "ADIm11"]
+
+for g in grabadora[3:]:        				#grabadora[1:]
     clear_output()
     print(g+'+++++++++++++++++++++++++++++++++++++++++++++          ')
     for fecha in glob.glob(g+'/*/'):
+    
+        df = pd.DataFrame(columns=header)
         print(fecha+'********************************************')
-        file = open(fecha+'vari20sep.csv', 'w', newline='')
+        file = open('**'+'30sep.csv', 'w', newline='')
         with file:
             writer = csv.writer(file)
             writer.writerow(header)
@@ -48,6 +57,8 @@ for g in grabadora[1:]:
                                          mode="magnitude", \
                                          noverlap=sobreposicion, nfft=nmin * nfft)
                 nmin = len(audio) // (60 * Fs)
+
+
                 ADIM=list(ADIm(s, Fs, 1000)[:11])
                 adi=ADI(s, 10000, 1000, -50)
                 aci=ACItf(audio, Fs, 5, s)
@@ -68,13 +79,22 @@ for g in grabadora[1:]:
                 chroma_stft = np.mean(librosa.feature.chroma_stft(y=x, sr=Fs))
                 spec_cent = np.mean(librosa.feature.spectral_centroid(y=x, sr=Fs))
                 spec_bw = np.mean(librosa.feature.spectral_bandwidth(y=x, sr=Fs))
-                to_append = f'{filename} {np.mean(chroma_stft)} {np.mean(spec_cent)} {np.mean(spec_bw)} {adi} {aci} {te} {sme} {ndsi} {r} {me} {mba} {bnf} {md} {fm} {we} {rmss} {cf}' 
+                f2, p = signal.welch(audio, Fs, nperseg=tamano_ventana, window=tipo_ventana,
+                                nfft=nfft, noverlap=sobreposicion)                
+
+                df=df.append({"filename":filename,"chroma_stft":chroma_stft,"spec_cent":spec_cent,"spec_bw":spec_bw, "ADI":adi, "TE":te, "ESM":sme, "NDSI":ndsi, "P":r, "M":me, "mba":mba,"bnf":bnf ,"md":md,"fm":fm, "we":we, "rms":rmss, "cf":cf,
+                        "ADIm1":ADIM[0], "ADIm2":ADIM[1], "ADIm3":ADIM[2], "ADIm4":ADIM[3], "ADIm5":ADIM[4], "ADIm6":ADIM[5], "ADIm7":ADIM[6], "ADIm8":ADIM[7],
+                       "ADIm9":ADIM[8], "ADIm10":ADIM[9], "ADIm11":ADIM[10], "PSD":np.mean(p)}, ignore_index=True )
+
+                df.to_csv(fecha+'prueba.csv')
+
                 print("--- %s seconds ---" % (time.time() - start_time))
-                for i in ADIM:
-                    to_append += f' {i}'
-                file = open(fecha+'vari20sep.csv', 'a', newline='')
-                with file:
-                    writer = csv.writer(file)
-                    writer.writerow(to_append.split())
+
             except:
                 print("grabacion con error:"+filename)
+
+
+
+
+
+
