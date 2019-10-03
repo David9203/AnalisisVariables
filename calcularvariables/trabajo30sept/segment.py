@@ -14,7 +14,7 @@ import time
 
 #·························DB path·····················
 #% cd /media/david/DavidDD/2017
-os.chdir("/media/david/DavidDD/bioacustica/2017")  ##direccion de disco duro
+os.chdir("/home/david/Música/Bioacustica/2015")  ##direccion de disco duro
 
 
 #···········Arguments for function-·····························
@@ -77,16 +77,16 @@ for g in grabadora[3:]:        				#grabadora[1:]
                 we=wiener_entropy(audio, tamano_ventana, nfft, tipo_ventana, sobreposicion)
                 rmss=rms(audio)
                 cf=crest_factor(audio, rmss)
-                chroma_stft = np.mean(librosa.feature.chroma_stft(y=x, sr=Fs))
-                spec_cent = np.mean(librosa.feature.spectral_centroid(y=x, sr=Fs))
-                spec_bw = np.mean(librosa.feature.spectral_bandwidth(y=x, sr=Fs))
+#                chroma_stft = np.mean(librosa.feature.chroma_stft(y=x, sr=Fs))
+ #               spec_cent = np.mean(librosa.feature.spectral_centroid(y=x, sr=Fs))
+  #              spec_bw = np.mean(librosa.feature.spectral_bandwidth(y=x, sr=Fs))
                 f2, p = signal.welch(audio, Fs, nperseg=tamano_ventana, window=tipo_ventana,
                                 nfft=nfft, noverlap=sobreposicion)                
 
 
 
 
-                df=df.append({"filename":filename, "ACI"=aci,"NDSI":ndsi, "M":me, "mba":mba,"bnf":bnf ,"fm":fm, "we":we, "rms":rmss, "cf":cf,
+                df=df.append({"filename":filename, "ACI":aci,"NDSI":ndsi, "M":me, "mba":mba,"bnf":bnf ,"fm":fm, "we":we, "rms":rmss, "cf":cf,
                         "ADIm1":ADIM[0], "ADIm2":ADIM[1], "ADIm3":ADIM[2], "ADIm4":ADIM[3], "ADIm5":ADIM[4], "ADIm6":ADIM[5], "ADIm7":ADIM[6], "ADIm8":ADIM[7],
                        "ADIm9":ADIM[8], "ADIm10":ADIM[9], "ADIm11":ADIM[10], "PSD":np.mean(p)}, ignore_index=True )
 
